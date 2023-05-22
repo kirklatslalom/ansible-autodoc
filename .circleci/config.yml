@@ -6,7 +6,7 @@ jobs:
     working_directory: ~/ansible-autodoc
     docker: # run the steps with Docker
       # CircleCI Python images available at: https://hub.docker.com/r/circleci/python/
-      - image: circleci/python:3.6.4
+      - image: cimg/python:3.8.4
 
     steps:
       - checkout
@@ -21,4 +21,3 @@ jobs:
 
 #      - store_test_results: # Upload test results for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
 #          path: test-results
-

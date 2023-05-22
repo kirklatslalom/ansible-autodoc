@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 import os
 import yaml
 from ansibleautodoc.Utils import Singleton
@@ -10,19 +11,19 @@ class Config:
 # https://github.com/AndresBott/ansible-autodoc
 # filename: autodoc.conf.yaml
 
-# base directoy to scan, relative dir to configuration file 
-# base_dir: "./" 
+# base directoy to scan, relative dir to configuration file
+# base_dir: "./"
 
 # documentation output directory, relative dir to configuration file.
-output_dir: "./doc" 
+output_dir: "./doc"
 
-# directory containing templates, relative dir to configuration file, 
+# directory containing templates, relative dir to configuration file,
 # comment to use default build in ones
-# template_dir: "./template" 
+# template_dir: "./template"
 
 # template directory name within template_dir
 # build in "doc_and_readme" and "readme"
-template: "readme" 
+template: "readme"
 
 # Overwrite documentation pages if already exist
 # this is equal to -y
@@ -32,8 +33,8 @@ template: "readme"
 # see -v | -vv | -vvv
 # debug_level: "warn"
 
-# when searching for yaml files in playbook projects, 
-# excluded this paths (dir and files) from analysis 
+# when searching for yaml files in playbook projects,
+# excluded this paths (dir and files) from analysis
 # default values
 excluded_playbook_dirs:
     - "host_vars"
@@ -41,9 +42,9 @@ excluded_playbook_dirs:
     - "host_secrets"
     - "plugins"
     - "autodoc.conf.yaml"
-    
-# when searching for yaml files in roles projects, 
-# excluded this paths (dir and files) from analysis 
+
+# when searching for yaml files in roles projects,
+# excluded this paths (dir and files) from analysis
 # default values
 excluded_roles_dirs: []
 
@@ -91,7 +92,7 @@ excluded_roles_dirs: []
         "group_vars",
         "host_secrets",
         "plugins",
-        "autodoc.conf.yaml"
+        "autodoc.conf.yaml",
     ]
 
     excluded_roles_dirs = []
@@ -105,8 +106,8 @@ excluded_roles_dirs: []
     ]
 
     # used in self promotion
-    autodoc_name= "Ansible-autodoc"
-    autodoc_url= "https://github.com/AndresBott/ansible-autodoc"
+    autodoc_name = "Ansible-autodoc"
+    autodoc_url = "https://github.com/AndresBott/ansible-autodoc"
 
     # annotation search patterns
 
@@ -116,14 +117,8 @@ excluded_roles_dirs: []
     # automatic = True this action will be parsed based on the annotation in name without calling the parse method
 
     annotations = {
-        "tag": {
-            "name": "tag",
-            "special":True
-        },
-        "meta": { # @meta: author # <name>
-            "name": "meta",
-            "automatic":True
-        },
+        "tag": {"name": "tag", "special": True},
+        "meta": {"name": "meta", "automatic": True},  # @meta: author # <name>
         "todo": {
             "name": "todo",
             "allow_multiple": True,
@@ -138,38 +133,34 @@ excluded_roles_dirs: []
             "name": "var",
             "automatic": True,
         },
-        "example": {
-            "name": "example",
-            "regex": "(\#\ *\@example\ *\: *.*)"
-        },
+        "example": {"name": "example", "regex": "(\#\ *\@example\ *\: *.*)"},
     }
 
     def __init__(self):
         self.script_base_dir = os.path.dirname(os.path.realpath(__file__))
 
-    def set_base_dir(self,dir):
+    def set_base_dir(self, dir):
         self._base_dir = dir
         self._set_is_role()
 
     def get_base_dir(self):
         return self._base_dir
 
-    def get_annotations_definition(self, automatic=True,special=True):
+    def get_annotations_definition(self, automatic=True, special=True):
         annotations = {}
 
         if automatic:
             for k, item in self.annotations.items():
                 if "automatic" in item.keys() and item["automatic"]:
-                    annotations[k]=item
+                    annotations[k] = item
         if special:
             for k, item in self.annotations.items():
                 if "special" in item.keys() and item["special"]:
-                    annotations[k]=item
+                    annotations[k] = item
 
         return annotations
 
-    def get_annotations_names(self,automatic=True,special=False):
-
+    def get_annotations_names(self, automatic=True, special=False):
         annotations = []
 
         if automatic:
@@ -187,9 +178,9 @@ excluded_roles_dirs: []
     def _set_is_role(self):
         # is role
         self.project_name = os.path.basename(self._base_dir)
-        if os.path.isdir(self._base_dir+"/roles"):
+        if os.path.isdir(self._base_dir + "/roles"):
             self.is_role = False
-        elif os.path.isdir(self._base_dir+"/tasks"):
+        elif os.path.isdir(self._base_dir + "/tasks"):
             self.is_role = True
         else:
             self.is_role = None
@@ -206,7 +197,7 @@ excluded_roles_dirs: []
         elif os.path.isabs(self.output_dir):
             return os.path.realpath(self.output_dir)
         elif not os.path.isabs(self.output_dir):
-            return os.path.realpath(self._config_file_dir+"/"+self.output_dir)
+            return os.path.realpath(self._config_file_dir + "/" + self.output_dir)
 
     def get_template_base_dir(self):
         """
@@ -214,7 +205,7 @@ excluded_roles_dirs: []
         :return: str abs path
         """
         if self.use_print_template:
-            return os.path.realpath(self.script_base_dir+"/templates/cliprint")
+            return os.path.realpath(self.script_base_dir + "/templates/cliprint")
 
         if self.template == "":
             template = self.default_template
@@ -222,14 +213,15 @@ excluded_roles_dirs: []
             template = self.template
 
         if self.template_dir == "":
-            return os.path.realpath(self.script_base_dir+"/templates/"+template)
+            return os.path.realpath(self.script_base_dir + "/templates/" + template)
         elif os.path.isabs(self.template_dir):
-            return os.path.realpath(self.template_dir+"/"+template)
+            return os.path.realpath(self.template_dir + "/" + template)
         elif not os.path.isabs(self.template_dir):
-            return os.path.realpath(self._config_file_dir+"/"+self.template_dir+"/"+template)
+            return os.path.realpath(
+                self._config_file_dir + "/" + self.template_dir + "/" + template
+            )
 
     def load_config_file(self, file):
-
         allow_to_overwrite = [
             "base_dir",
             "output_dir",
@@ -239,21 +231,19 @@ excluded_roles_dirs: []
             "debug_level",
             "excluded_playbook_dirs",
             "excluded_roles_dirs",
-
         ]
         # overwrite_map = {
         #     "base_dir":"set_base_dir",
         # }
 
-        with open(file, 'r') as yaml_file:
-
+        with open(file, "r") as yaml_file:
             try:
                 self._config_file_dir = os.path.dirname(os.path.realpath(file))
                 data = yaml.load(yaml_file)
                 if data:
                     for item_to_configure in allow_to_overwrite:
                         if item_to_configure in data.keys():
-                            self.__setattr__(item_to_configure,data[item_to_configure])
+                            self.__setattr__(item_to_configure, data[item_to_configure])
 
             except yaml.YAMLError as exc:
                 print(exc)
@@ -261,4 +251,3 @@ excluded_roles_dirs: []
 
 class SingleConfig(Config, metaclass=Singleton):
     pass
-

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import yaml
 import re
@@ -10,7 +11,6 @@ from ansibleautodoc.FileRegistry import Registry
 
 
 class AnnotationItem:
-
     key = ""  # annotation identifying key
     value = ""  # annotation data
     desc = ""  # annotation longer description
@@ -22,13 +22,13 @@ class AnnotationItem:
     # next time improve this by looping over public available attributes
     def __str__(self):
         s = "{"
-        s += "key: "+self.key+", "
-        s += "value: "+self.value+", "
-        s += "desc: "+self.desc+", "
-        s += "role: "+self.role+", "
-        s += "file: "+self.file+", "
-        s += "line: "+self.line+" "
-        s += "line: "+self.example+" "
+        s += "key: " + self.key + ", "
+        s += "value: " + self.value + ", "
+        s += "desc: " + self.desc + ", "
+        s += "role: " + self.role + ", "
+        s += "file: " + self.file + ", "
+        s += "line: " + self.line + " "
+        s += "line: " + self.example + " "
         s += "}"
         return s
 
@@ -45,7 +45,6 @@ class AnnotationItem:
 
 
 class Annotation:
-
     _files_registry = None  # reference to current file registry
     _annotation_definition = None  # current annotation definition
     _all_annotations = None  # reference to defined annotation definition
@@ -61,7 +60,7 @@ class Annotation:
     _duplucate_items = {}
     _role_items = {}
 
-    def __init__(self,name,files_registry):
+    def __init__(self, name, files_registry):
         self.config = SingleConfig()
         self.log = SingleLog()
         self._files_registry = files_registry
@@ -72,7 +71,10 @@ class Annotation:
             self._annotation_definition = self._all_annotations[name]
 
             # check for allow multiple
-            if "allow_multiple" in self._annotation_definition.keys() and self._annotation_definition["allow_multiple"] == True:
+            if (
+                "allow_multiple" in self._annotation_definition.keys()
+                and self._annotation_definition["allow_multiple"] == True
+            ):
                 self._allow_multiple = True
 
             else:
@@ -85,7 +87,10 @@ class Annotation:
         if self._annotation_definition is not None:
             self._find_annotation()
 
-        if "special" in self._annotation_definition.keys() and self._annotation_definition["special"]:
+        if (
+            "special" in self._annotation_definition.keys()
+            and self._annotation_definition["special"]
+        ):
             if name == "tag":
                 self._find_tags()
 
@@ -97,16 +102,14 @@ class Annotation:
         }
 
     def _find_annotation(self):
-
-        regex = "(\#\ *\@"+self._annotation_definition["name"]+"\ +.*)"
+        regex = "(\#\ *\@" + self._annotation_definition["name"] + "\ +.*)"
         for role, files_in_role in self._files_registry.get_files().items():
-
             for file in files_in_role:
                 # reset stats
                 self._current_line = 1
                 self._current_file = file
                 self._current_role = role
-                self._file_handler = open(file, encoding='utf8')
+                self._file_handler = open(file, encoding="utf8")
                 self._current_file_pos = 0
 
                 while True:
@@ -115,15 +118,16 @@ class Annotation:
                         break
 
                     if re.match(regex, line):
-                        item = self._get_annotation_data(line,self._annotation_definition["name"])
+                        item = self._get_annotation_data(
+                            line, self._annotation_definition["name"]
+                        )
                         # print(item.get_obj())
                         self._populate_item(item)
 
                     self._current_line += 1
                 self._file_handler.close()
 
-    def _populate_item(self,item):
-
+    def _populate_item(self, item):
         if self._allow_multiple:
             # all items
             if item.key not in self._all_items.keys():
@@ -140,7 +144,6 @@ class Annotation:
             self._role_items[item.role][item.key].append(item.get_obj())
 
         else:
-
             if item.key not in self._all_items.keys():
                 self._all_items[item.key] = item.get_obj()
             else:
@@ -158,7 +161,7 @@ class Annotation:
             if item.key not in self._role_items[item.role].keys():
                 self._role_items[item.role][item.key] = item.get_obj()
 
-    def _get_annotation_data(self,line,name):
+    def _get_annotation_data(self, line, name):
         """
         make some string conversion on a line in order to get the relevant data
         :param line:
@@ -168,7 +171,7 @@ class Annotation:
         # fill some more data
         if self._current_file:
             # item.file = self._current_file
-            item.file = self._current_file[len(self.config.get_base_dir()) +1 :]
+            item.file = self._current_file[len(self.config.get_base_dir()) + 1 :]
 
         if self._current_role:
             item.role = self._current_role
@@ -177,27 +180,27 @@ class Annotation:
 
         # step1 remove the annotation
         # reg1 = "(\#\ *\@"++"\ *)"
-        reg1 = "(\#\ *\@"+name+"\ *)"
-        line1 = re.sub(reg1, '', line).strip()
+        reg1 = "(\#\ *\@" + name + "\ *)"
+        line1 = re.sub(reg1, "", line).strip()
 
         # print("line1: '"+line1+"'")
         # step2 split annotation and comment by #
         parts = line1.split("#")
 
         # step3 take the main key value from the annotation
-        subparts = parts[0].split(":",1)
+        subparts = parts[0].split(":", 1)
 
         key = str(subparts[0].strip())
         if key.strip() == "":
             key = "_unset_"
         item.key = key
 
-        if len(subparts)>1:
+        if len(subparts) > 1:
             item.value = subparts[1].strip()
 
         # step4 check for multiline description
         multiline = ""
-        stars_with_annotation = '(\#\ *[\@][\w]+)'
+        stars_with_annotation = "(\#\ *[\@][\w]+)"
         current_file_position = self._file_handler.tell()
 
         while True:
@@ -226,12 +229,12 @@ class Annotation:
             if name == "example":
                 multiline += next_line.replace("#", "", 1)
             else:
-                multiline += " "+test_line.strip()
+                multiline += " " + test_line.strip()
 
         # step5 take the description, there is something after #
         if len(parts) > 1:
             desc = parts[1].strip()
-            desc += " "+multiline.strip()
+            desc += " " + multiline.strip()
             item.desc = desc.strip()
         elif multiline != "":
             item.desc = multiline.strip()
@@ -240,7 +243,6 @@ class Annotation:
         example = ""
 
         if name != "example":
-
             current_file_position = self._file_handler.tell()
             example_regex = "(\#\ *\@example\ +.*)"
 
@@ -257,7 +259,7 @@ class Annotation:
                         break
 
                 if re.match(example_regex, next_line):
-                    example = self._get_annotation_data(next_line,"example")
+                    example = self._get_annotation_data(next_line, "example")
                     # pprint.pprint(example.get_obj())
                     self._file_handler.seek(current_file_position)
                     break
@@ -269,18 +271,16 @@ class Annotation:
     def _find_tags(self):
         for role, files_in_role in self._files_registry.get_files().items():
             for file in files_in_role:
-
-                with open(file, 'r',encoding='utf8') as yaml_file:
+                with open(file, "r", encoding="utf8") as yaml_file:
                     try:
                         data = yaml.load(yaml_file)
-                        tags_found = Annotation.find_tag("tags",data)
+                        tags_found = Annotation.find_tag("tags", data)
 
                         for tag in tags_found:
                             if tag not in self.config.excluded_tags:
-
                                 item = AnnotationItem()
                                 # item.file = file
-                                item.file = file[len(self.config.get_base_dir()) +1 :]
+                                item.file = file[len(self.config.get_base_dir()) + 1 :]
 
                                 item.role = role
                                 item.key = tag
@@ -294,7 +294,9 @@ class Annotation:
                                 elif role != self._all_items[tag]["role"]:
                                     if tag not in self._duplucate_items.keys():
                                         self._duplucate_items[tag] = []
-                                        self._duplucate_items[tag].append(self._all_items[tag])
+                                        self._duplucate_items[tag].append(
+                                            self._all_items[tag]
+                                        )
                                     self._duplucate_items[tag].append(item.get_obj())
 
                                 # per role
@@ -307,29 +309,28 @@ class Annotation:
                         print(exc)
 
     @staticmethod
-    def find_tag(key,data):
-
+    def find_tag(key, data):
         r = []
-        if isinstance(data,list):
+        if isinstance(data, list):
             for d in data:
                 tmp_r = Annotation.find_tag(key, d)
                 if tmp_r:
-                    r = Annotation.merge_list_no_duplicates(r,tmp_r)
+                    r = Annotation.merge_list_no_duplicates(r, tmp_r)
 
-        elif isinstance(data,dict):
-            for k,d in data.items():
+        elif isinstance(data, dict):
+            for k, d in data.items():
                 if k == key:
-                    if isinstance(d,str):
+                    if isinstance(d, str):
                         d = [d]
                     r = r + d
                 else:
                     tmp_r = Annotation.find_tag(key, d)
                     if tmp_r:
-                        r = Annotation.merge_list_no_duplicates(r,tmp_r)
+                        r = Annotation.merge_list_no_duplicates(r, tmp_r)
         return r
 
     @staticmethod
-    def merge_list_no_duplicates(a1,a2):
+    def merge_list_no_duplicates(a1, a2):
         """
         merge two lists by overwriting the original with the second one if the key exists
         :param a1:
@@ -337,7 +338,7 @@ class Annotation:
         :return:
         """
         r = []
-        if isinstance(a1,list) and isinstance(a2,list):
+        if isinstance(a1, list) and isinstance(a2, list):
             r = a1
             for i in a2:
                 if i not in a1:

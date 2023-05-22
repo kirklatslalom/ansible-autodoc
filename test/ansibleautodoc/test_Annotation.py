@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 import os
 import pprint
 
@@ -6,21 +7,26 @@ from ansibleautodoc.Config import SingleConfig, Config
 from ansibleautodoc.Annotation import Annotation
 from ansibleautodoc.FileRegistry import Registry
 
-project_dir = os.path.realpath(os.path.dirname(os.path.realpath(__file__))+"../../../")
-sample_project = os.path.realpath(os.path.dirname(os.path.realpath(__file__))+"../../test-project")
+project_dir = os.path.realpath(
+    os.path.dirname(os.path.realpath(__file__)) + "../../../"
+)
+sample_project = os.path.realpath(
+    os.path.dirname(os.path.realpath(__file__)) + "../../test-project"
+)
 
 config = SingleConfig()
 config.set_base_dir(sample_project)
 
 fr = Registry()
 fr._doc = {
-    "_ansible_playbook_": [sample_project+"/test.yaml"],
-    "role1":[sample_project+"/roles/role1/tasks/test.yaml"]
+    "_ansible_playbook_": [sample_project + "/test.yaml"],
+    "role1": [sample_project + "/roles/role1/tasks/test.yaml"],
 }
+
 
 def test_get_details():
     print()
-    annotation = Annotation("meta",files_registry=fr)
+    annotation = Annotation("meta", files_registry=fr)
 
     items = annotation.get_details()
 
@@ -41,9 +47,10 @@ def test_get_details():
     assert item4["value"] == ""
     assert item4["desc"] == "desc4 desc42"
 
+
 def test_get_details_on_duplicates():
     print()
-    annotation = Annotation("todo",files_registry=fr)
+    annotation = Annotation("todo", files_registry=fr)
 
     items = annotation.get_details()
 
@@ -61,9 +68,10 @@ def test_get_details_on_duplicates():
     else:
         assert False
 
+
 def test_get_details_on_tags():
     print()
-    annotation = Annotation("tag",files_registry=fr)
+    annotation = Annotation("tag", files_registry=fr)
 
     items = annotation.get_details()
 

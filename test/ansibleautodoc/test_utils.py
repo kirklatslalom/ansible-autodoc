@@ -1,10 +1,10 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
 from ansibleautodoc.Utils import SingleLog
 
 
 class TestLog(object):
-
     def test_default_log_level(self):
         log = SingleLog()
         assert log.log_level == 1
@@ -15,7 +15,7 @@ class TestLog(object):
         log.set_level("debug")
         assert log.log_level == 0
 
-    def test_print_in_info(self,capsys):
+    def test_print_in_info(self, capsys):
         log = SingleLog()
         log.set_level("info")
         log.debug("test message")
@@ -23,7 +23,7 @@ class TestLog(object):
         captured = capsys.readouterr()
         assert captured.out == "*INFO*: test message\n"
 
-    def test_print_list(self,capsys):
-        SingleLog.print("msg",["item1"])
+    def test_print_list(self, capsys):
+        SingleLog.print("msg", ["item1"])
         captured = capsys.readouterr()
-        assert captured.out == 'msg\n  [0]: item1\n'
+        assert captured.out == "msg\n  [0]: item1\n"

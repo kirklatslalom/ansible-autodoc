@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import os
 import sys
@@ -10,8 +11,8 @@ from ansibleautodoc.DocumentationParser import Parser
 from ansibleautodoc.DocumentationGenerator import Generator
 from ansibleautodoc import __version__
 
-class AnsibleAutodoc:
 
+class AnsibleAutodoc:
     def __init__(self):
         self.config = SingleConfig()
         self.log = SingleLog(self.config.debug_level)
@@ -22,42 +23,74 @@ class AnsibleAutodoc:
         doc_generator = Generator(doc_parser)
         doc_generator.render()
 
-
     def _cli_args(self):
         """
         use argparse for parsing CLI arguments
         :return: args objec
         """
-        usage = '''ansible-autodoc [project_directory] [options]'''
-        parser = argparse.ArgumentParser(description='Generate documentation from annotated playbooks and roles using templates', usage=usage)
+        usage = """ansible-autodoc [project_directory] [options]"""
+        parser = argparse.ArgumentParser(
+            description="Generate documentation from annotated playbooks and roles using templates",
+            usage=usage,
+        )
         # parser.add_argument("-f", "--force", help="Force online list", action="store_true")
         # parser.add_argument('-t','--type', nargs='+', help='<Required> Set flag', required=True)
         # parser.add_argument('-t','--type', nargs='+', help='<Required> Set flag')
 
-        parser.add_argument('project_dir', nargs='?', default=os.getcwd(),help="Project directory to scan, "
-                                                                               "if empty current working will be used.")
-        parser.add_argument('-C',"--conf", nargs='?', default="",help="specify an configuration file")
-        parser.add_argument('-o', action="store", dest="output", type=str, help='Define the destination '
-                                                                               'folder of your documenation')
-        parser.add_argument('-y', action='store_true', help='overwrite the output without asking')
+        parser.add_argument(
+            "project_dir",
+            nargs="?",
+            default=os.getcwd(),
+            help="Project directory to scan, " "if empty current working will be used.",
+        )
+        parser.add_argument(
+            "-C", "--conf", nargs="?", default="", help="specify an configuration file"
+        )
+        parser.add_argument(
+            "-o",
+            action="store",
+            dest="output",
+            type=str,
+            help="Define the destination " "folder of your documenation",
+        )
+        parser.add_argument(
+            "-y", action="store_true", help="overwrite the output without asking"
+        )
 
-        parser.add_argument('-D',"--dry", action='store_true', help='Dry runt without writing')
+        parser.add_argument(
+            "-D", "--dry", action="store_true", help="Dry runt without writing"
+        )
 
-        parser.add_argument("--sample-config", action='store_true', help='Print the sample configuration yaml file')
+        parser.add_argument(
+            "--sample-config",
+            action="store_true",
+            help="Print the sample configuration yaml file",
+        )
 
-        parser.add_argument('-p', nargs='?', default="_unset_", help='use print template instead of writing to files, '
-                                                                     'sections: all, info, tags, todo, var')
+        parser.add_argument(
+            "-p",
+            nargs="?",
+            default="_unset_",
+            help="use print template instead of writing to files, "
+            "sections: all, info, tags, todo, var",
+        )
 
-        parser.add_argument('-V',"--version", action='store_true', help='Get versions')
+        parser.add_argument("-V", "--version", action="store_true", help="Get versions")
 
         debug_level = parser.add_mutually_exclusive_group()
-        debug_level.add_argument('-v', action='store_true', help='Set debug level to info')
-        debug_level.add_argument('-vv', action='store_true', help='Set debug level to debug')
-        debug_level.add_argument('-vvv', action='store_true', help='Set debug level to trace')
+        debug_level.add_argument(
+            "-v", action="store_true", help="Set debug level to info"
+        )
+        debug_level.add_argument(
+            "-vv", action="store_true", help="Set debug level to debug"
+        )
+        debug_level.add_argument(
+            "-vvv", action="store_true", help="Set debug level to trace"
+        )
 
         return parser.parse_args()
 
-    def _parse_args(self,args):
+    def _parse_args(self, args):
         """
         Use an args object to apply all the configuration combinations to the config object
         :param args:
@@ -68,14 +101,17 @@ class AnsibleAutodoc:
         # search for config file
         if args.conf != "":
             conf_file = os.path.abspath(args.conf)
-            if os.path.isfile(conf_file) and os.path.basename(conf_file) == self.config.config_file_name:
+            if (
+                os.path.isfile(conf_file)
+                and os.path.basename(conf_file) == self.config.config_file_name
+            ):
                 self.config.load_config_file(conf_file)
                 # re apply log level based on config
                 self.log.set_level(self.config.debug_level)
             else:
-                self.log.warn("No configuration file found: "+conf_file)
+                self.log.warn("No configuration file found: " + conf_file)
         else:
-            conf_file = self.config.get_base_dir()+"/"+self.config.config_file_name
+            conf_file = self.config.get_base_dir() + "/" + self.config.config_file_name
             if os.path.isfile(conf_file):
                 self.config.load_config_file(conf_file)
                 # re apply log level based on config
@@ -100,7 +136,7 @@ class AnsibleAutodoc:
             self.log.set_level("trace")
 
         # need to send the message after the log levels have been set
-        self.log.debug("using configuration file: "+conf_file)
+        self.log.debug("using configuration file: " + conf_file)
 
         # Overwrite
         if args.y is True:
@@ -111,7 +147,9 @@ class AnsibleAutodoc:
             self.config.dry_run = True
             if self.log.log_level > 1:
                 self.log.set_level(1)
-                self.log.info("Running in Dry mode: Therefore setting log level at least to INFO")
+                self.log.info(
+                    "Running in Dry mode: Therefore setting log level at least to INFO"
+                )
 
         # Print template
         if args.p == "_unset_":
@@ -127,15 +165,18 @@ class AnsibleAutodoc:
 
         # some debug
         self.log.debug(args)
-        self.log.info("Using base dir: "+self.config.get_base_dir())
+        self.log.info("Using base dir: " + self.config.get_base_dir())
 
         if self.config.is_role:
             self.log.info("This is detected as: ROLE ")
         elif self.config.is_role is not None and not self.config.is_role:
             self.log.info("This is detected as: PLAYBOOK ")
         else:
-            self.log.error([
-                self.config.get_base_dir()+"/roles",
-                self.config.get_base_dir()+"/tasks"
-            ],"No ansible root project found, checked for: ")
+            self.log.error(
+                [
+                    self.config.get_base_dir() + "/roles",
+                    self.config.get_base_dir() + "/tasks",
+                ],
+                "No ansible root project found, checked for: ",
+            )
             sys.exit(1)
